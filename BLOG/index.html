@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 5px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      form {
+        margin-bottom: 20px;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      div.post {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Blog</h1>
+      <form id="postForm" action="">
+        <input type="text" name="title" placeholder="Title" required />
+        <textarea name="content" placeholder="Content" required></textarea>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="posts"></div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const postForm = document.getElementById("postForm");
+        const postsContainer = document.getElementById("posts");
+
+        // Fetch all posts
+        fetch("/posts")
+          .then((response) => response.json())
+          .then((posts) => {
+            posts.forEach((post) => {
+              const postElement = document.createElement("div");
+              postElement.innerHTML = `
+                    <h2>${post.title}</h2>
+                    <p>${post.content}</p>
+                    <p>${new Date(post.date).toLocaleDateString()}</p>
+                `;
+              postsContainer.appendChild(postElement);
+            });
+          });
+        document
+          .getElementById("postForm")
+          .addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const title = formData.get("title");
+            const content = formData.get("content");
+
+            try {
+              const response = await fetch("/posts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, content }),
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to create post");
+              }
+
+              // Handle success response (e.g., display success message, redirect to home page)
+            } catch (error) {
+              console.error("Error creating post:", error);
+              // Handle error (e.g., display error message to user)
+            }
+          });
+      });
+    </script>
+  </body>
+</html>
